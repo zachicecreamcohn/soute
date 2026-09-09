@@ -45,6 +45,26 @@ func Init(prefill *config.Config) (*config.Config, error) {
 	return &cfg, nil
 }
 
+// Settings runs the settings-only wizard (defaults and thresholds), skipping
+// the target path prompt.
+func Settings(prefill *config.Config) (*config.Config, error) {
+	cfg := config.Default()
+	useDefaults := true
+	if prefill != nil {
+		cfg = *prefill
+	}
+
+	if err := run(huh.NewForm(huh.NewGroup(defaultsField(&useDefaults)))); err != nil {
+		return nil, err
+	}
+	if !useDefaults {
+		if err := numberFields(&cfg); err != nil {
+			return nil, err
+		}
+	}
+	return &cfg, nil
+}
+
 // SelectSnapshot presents the history (newest first) for selection.
 func SelectSnapshot(snapshots []manifest.Snapshot) (*manifest.Snapshot, error) {
 	if len(snapshots) == 0 {

@@ -12,6 +12,7 @@ import (
 	"github.com/zachicecreamcohn/soute/internal/config"
 	"github.com/zachicecreamcohn/soute/internal/manifest"
 	"github.com/zachicecreamcohn/soute/internal/paths"
+	"github.com/zachicecreamcohn/soute/internal/tui"
 )
 
 func newInitCmd() *cobra.Command {
@@ -30,25 +31,44 @@ func newInitCmd() *cobra.Command {
 			if len(args) != 1 {
 				return errors.New("target path is required: `soute init <target>`")
 			}
-
-			c := config.Default()
-			c.TargetPath = paths.CleanInput(args[0])
-			if c.TargetPath == "" {
+			target := paths.CleanInput(args[0])
+			if target == "" {
 				return errors.New("target path is required: `soute init <target>`")
 			}
-			if cmd.Flags().Changed("min-bytes") {
-				c.MinDeltaBytes = minBytes
+
+			prefill := config.Default()
+			prefill.TargetPath = target
+
+			// Flags select non-interactive mode; otherwise run the settings
+			// wizard (it never asks for the path, which is already positional).
+			interactive := !cmd.Flags().Changed("min-bytes") &&
+				!cmd.Flags().Changed("min-pct") &&
+				!cmd.Flags().Changed("cooldown") &&
+				!cmd.Flags().Changed("max-snapshots")
+
+			var cfg *config.Config
+			if interactive {
+				c, err := tui.Settings(&prefill)
+				if err != nil {
+					return err
+				}
+				cfg = c
+			} else {
+				if cmd.Flags().Changed("min-bytes") {
+					prefill.MinDeltaBytes = minBytes
+				}
+				if cmd.Flags().Changed("min-pct") {
+					prefill.MinDeltaPct = minPct
+				}
+				if cmd.Flags().Changed("cooldown") {
+					prefill.CooldownSeconds = cooldown
+				}
+				if cmd.Flags().Changed("max-snapshots") {
+					prefill.MaxSnapshots = maxSnaps
+				}
+				cfg = &prefill
 			}
-			if cmd.Flags().Changed("min-pct") {
-				c.MinDeltaPct = minPct
-			}
-			if cmd.Flags().Changed("cooldown") {
-				c.CooldownSeconds = cooldown
-			}
-			if cmd.Flags().Changed("max-snapshots") {
-				c.MaxSnapshots = maxSnaps
-			}
-			return initProject(&c)
+			return initProject(cfg)
 		},
 	}
 
