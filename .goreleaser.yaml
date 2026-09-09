@@ -1,0 +1,62 @@
+version: 2
+
+project_name: soute
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w -X github.com/zachicecreamcohn/soute/cmd.version={{ .Version }}
+
+archives:
+  - formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+
+checksum:
+  name_template: checksums.txt
+
+snapshot:
+  version_template: '{{ incpatch .Version }}-next'
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^chore:'
+      - '^ci:'
+
+release:
+  github:
+    owner: zachicecreamcohn
+    name: soute
+
+brews:
+  - name: soute
+    repository:
+      owner: zachicecreamcohn
+      name: homebrew-soute
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    commit_author:
+      name: goreleaserbot
+      email: bot@goreleaser.com
+    directory: Formula
+    homepage: "https://github.com/zachicecreamcohn/soute"
+    description: "Zero-friction versioning for large binary & media files"
+    license: MIT
+    test: |
+      system "#{bin}/soute --version"
