@@ -1,70 +1,52 @@
 # soute
 
-Zero-friction versioning for large binary & media files (QLab shows, WATCHOUT
-files, Ableton sets, Photoshop documents). `soute` runs an invisible background
-daemon that creates content-addressed snapshots whenever a watched file changes
-by more than a configurable size or percentage delta.
+Zero-friction versioning for large binary & media files (QLab, WATCHOUT,
+Ableton, Photoshop). A background daemon snapshots a watched file whenever a
+save changes it beyond a configurable size or percentage delta.
 
-## Build
+## Install
 
-Requires Go 1.23+ (the charmbracelet and fsnotify dependencies require it).
+Prebuilt binaries for macOS, Linux, and Windows (amd64 and arm64) are on the
+[releases page](https://github.com/zachicecreamcohn/soute/releases/latest).
+
+Or with Go:
 
 ```sh
-go build -o soute .
+go install github.com/zachicecreamcohn/soute@latest
 ```
 
-## Usage
+## Quick start
+
+```sh
+soute init      # point it at your show file
+soute watch     # start the background daemon
+# …edit and save the file…
+soute list      # view snapshots
+soute restore   # roll back to a snapshot
+```
+
+## Commands
 
 ```text
-soute init                        # interactive setup wizard
-soute watch                       # fork a background watcher (--daemon=false for foreground)
-soute status                      # daemon health + last 3 snapshots
-soute list                        # full history
-soute restore [snapshot_id]       # pause daemon, back up current state, restore
-soute export [id] [destination]   # copy a snapshot out (daemon untouched)
-soute prune [--keep N] [--all]    # garbage-collect
-soute config [view|edit]          # show or edit settings
-soute stop                        # stop the daemon
+init                        create a .snapshots config for a file
+watch                       start the background watcher (--daemon=false for foreground)
+status                      daemon health + recent snapshots
+list                        full snapshot history
+restore [id]                restore a snapshot (backs up the current file first)
+export [id] [destination]   copy a snapshot out, leaving the working file alone
+prune [--keep N] [--all]    garbage-collect snapshots
+config [view|edit]          view or edit settings
+stop                        stop the daemon
 ```
 
-Every command accepts `--dir <path>` (default `.`) pointing at the directory
-that contains `.snapshots`. `init` is non-interactive when given `--target`
-(plus optional `--min-bytes`, `--min-pct`, `--cooldown`, `--max-snapshots`).
+All commands accept `--dir <path>` (default `.`) for the directory containing
+`.snapshots`.
 
-## Storage
+## How it works
 
-Each monitored file has a `.snapshots/` directory beside it:
-
-```text
-.snapshots/
-├── config.json      # settings (thresholds, cooldown, retention)
-├── daemon.pid       # single-instance lock
-├── manifest.json    # history index (source of truth)
-└── data/            # content-addressed blob store (SHA-256)
-```
-
-Snapshots are deduplicated by content: saving identical bytes never duplicates
-storage. Blobs are written to a `.tmp` file and atomically renamed, so a crash
-can never leave a partial object behind.
-
-## How the daemon works
-
-- Watches the target's **directory**, since atomic saves rename files in and out.
-- Coalesces rapid events through a fixed **300 ms** debounce window.
-- Retries transient lock/stat failures at **100/200/400 ms**.
-- Captures when `|Δsize| >= min_delta_bytes` **or** `Δ% >= min_delta_pct`,
-  then aborts if the SHA-256 matches the previous snapshot.
-- Enforces `cooldown_seconds` as the minimum interval between snapshots.
-
-## Design notes
-
-**Cross-platform IPC.** The spec's daemon control (`SIGTERM`/`SIGUSR1`/`SIGUSR2`,
-`Setsid`) is POSIX-only, so it is abstracted behind build tags:
-
-- **macOS / Linux**: POSIX signals and `Setsid`, exactly as specified.
-- **Windows**: a per-project named pipe (`soute-<hash>`) carries the same
-  stop/pause/resume commands, and the child detaches via `DETACHED_PROCESS`.
-
-**Restore tagging.** Snapshots are tagged `auto`, `manual`, or
-`pre_restore_backup`. A `restore` entry is additionally appended after every
-restore so the timeline records when a restore happened and to what.
+Each watched file gets a `.snapshots/` directory beside it holding `config.json`
+(settings), `manifest.json` (history), and a content-addressed `data/` blob
+store. Identical saves deduplicate by SHA-256 and blobs are written atomically.
+The daemon watches the file's directory, coalesces rapid save events through a
+300 ms debounce, and snapshots when the change crosses `min_delta_bytes` or
+`min_delta_pct`.
