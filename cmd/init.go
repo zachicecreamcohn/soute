@@ -12,12 +12,10 @@ import (
 	"github.com/zachicecreamcohn/soute/internal/config"
 	"github.com/zachicecreamcohn/soute/internal/manifest"
 	"github.com/zachicecreamcohn/soute/internal/paths"
-	"github.com/zachicecreamcohn/soute/internal/tui"
 )
 
 func newInitCmd() *cobra.Command {
 	var (
-		target   string
 		minBytes int64
 		minPct   float64
 		cooldown int
@@ -25,55 +23,35 @@ func newInitCmd() *cobra.Command {
 	)
 
 	cmd := &cobra.Command{
-		Use:   "init [target]",
+		Use:   "init <target>",
 		Short: "Create a .snapshots configuration for a target file",
 		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			targetPath := target
-			if len(args) == 1 {
-				targetPath = args[0]
+			if len(args) != 1 {
+				return errors.New("target path is required: `soute init <target>`")
 			}
 
-			interactive := len(args) == 0 &&
-				!cmd.Flags().Changed("target") &&
-				!cmd.Flags().Changed("min-bytes") &&
-				!cmd.Flags().Changed("min-pct") &&
-				!cmd.Flags().Changed("cooldown") &&
-				!cmd.Flags().Changed("max-snapshots")
-
-			var cfg *config.Config
-			if interactive {
-				c, err := tui.Init(nil)
-				if err != nil {
-					return err
-				}
-				cfg = c
-			} else {
-				c := config.Default()
-				c.TargetPath = paths.CleanInput(targetPath)
-				if cmd.Flags().Changed("min-bytes") {
-					c.MinDeltaBytes = minBytes
-				}
-				if cmd.Flags().Changed("min-pct") {
-					c.MinDeltaPct = minPct
-				}
-				if cmd.Flags().Changed("cooldown") {
-					c.CooldownSeconds = cooldown
-				}
-				if cmd.Flags().Changed("max-snapshots") {
-					c.MaxSnapshots = maxSnaps
-				}
-				cfg = &c
+			c := config.Default()
+			c.TargetPath = paths.CleanInput(args[0])
+			if c.TargetPath == "" {
+				return errors.New("target path is required: `soute init <target>`")
 			}
-
-			if cfg.TargetPath == "" {
-				return errors.New("target path is required (use `soute init <target>` or `--target`)")
+			if cmd.Flags().Changed("min-bytes") {
+				c.MinDeltaBytes = minBytes
 			}
-			return initProject(cfg)
+			if cmd.Flags().Changed("min-pct") {
+				c.MinDeltaPct = minPct
+			}
+			if cmd.Flags().Changed("cooldown") {
+				c.CooldownSeconds = cooldown
+			}
+			if cmd.Flags().Changed("max-snapshots") {
+				c.MaxSnapshots = maxSnaps
+			}
+			return initProject(&c)
 		},
 	}
 
-	cmd.Flags().StringVar(&target, "target", "", "target file to watch (non-interactive)")
 	cmd.Flags().Int64Var(&minBytes, "min-bytes", 0, "minimum absolute size delta in bytes")
 	cmd.Flags().Float64Var(&minPct, "min-pct", 0, "minimum relative size delta in percent")
 	cmd.Flags().IntVar(&cooldown, "cooldown", 0, "cooldown between snapshots in seconds")

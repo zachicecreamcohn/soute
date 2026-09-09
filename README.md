@@ -18,7 +18,7 @@ go install github.com/zachicecreamcohn/soute@latest
 ## Quick start
 
 ```sh
-soute init <path-to-file>   # or just `soute init` for the wizard
+soute init <path-to-file>
 soute watch                 # start the background daemon
 # …edit and save the file…
 soute list                  # view snapshots
@@ -27,7 +27,7 @@ soute restore               # roll back to a snapshot
 
 ## Commands
 
-- `init [target]` — create a `.snapshots` config for a file
+- `init <target>` — create a `.snapshots` config for a file
 - `watch` — start the background watcher (`--daemon=false` for foreground)
 - `status` — daemon health + recent snapshots
 - `list` — full snapshot history
