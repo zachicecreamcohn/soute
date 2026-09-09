@@ -11,6 +11,9 @@
 # Local smoke-test scratch
 .smoke/
 
+# GoReleaser output
+dist/
+
 # Test output
 *.test
 *.out

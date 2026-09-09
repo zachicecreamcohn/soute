@@ -44,19 +44,3 @@ release:
   github:
     owner: zachicecreamcohn
     name: soute
-
-brews:
-  - name: soute
-    repository:
-      owner: zachicecreamcohn
-      name: homebrew-soute
-      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
-    commit_author:
-      name: goreleaserbot
-      email: bot@goreleaser.com
-    directory: Formula
-    homepage: "https://github.com/zachicecreamcohn/soute"
-    description: "Zero-friction versioning for large binary & media files"
-    license: MIT
-    test: |
-      system "#{bin}/soute --version"
