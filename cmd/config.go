@@ -29,7 +29,7 @@ func newConfigCmd() *cobra.Command {
 			Short: "Edit settings via the wizard",
 			Args:  cobra.NoArgs,
 			RunE: func(_ *cobra.Command, _ []string) error {
-				snapDir, err := snapshotsDir()
+				snapDir, err := requireSnapshots()
 				if err != nil {
 					return err
 				}
@@ -53,7 +53,7 @@ func newConfigCmd() *cobra.Command {
 }
 
 func configView(_ *cobra.Command, _ []string) error {
-	snapDir, err := snapshotsDir()
+	snapDir, err := requireSnapshots()
 	if err != nil {
 		return err
 	}

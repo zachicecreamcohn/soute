@@ -18,26 +18,24 @@ go install github.com/zachicecreamcohn/soute@latest
 ## Quick start
 
 ```sh
-soute init      # point it at your show file
-soute watch     # start the background daemon
+soute init <path-to-file>   # or just `soute init` for the wizard
+soute watch                 # start the background daemon
 # …edit and save the file…
-soute list      # view snapshots
-soute restore   # roll back to a snapshot
+soute list                  # view snapshots
+soute restore               # roll back to a snapshot
 ```
 
 ## Commands
 
-```text
-init                        create a .snapshots config for a file
-watch                       start the background watcher (--daemon=false for foreground)
-status                      daemon health + recent snapshots
-list                        full snapshot history
-restore [id]                restore a snapshot (backs up the current file first)
-export [id] [destination]   copy a snapshot out, leaving the working file alone
-prune [--keep N] [--all]    garbage-collect snapshots
-config [view|edit]          view or edit settings
-stop                        stop the daemon
-```
+- `init [target]` — create a `.snapshots` config for a file
+- `watch` — start the background watcher (`--daemon=false` for foreground)
+- `status` — daemon health + recent snapshots
+- `list` — full snapshot history
+- `restore [id]` — restore a snapshot (backs up the current file first)
+- `export [id] [destination]` — copy a snapshot out, leaving the working file alone
+- `prune [--keep N] [--all]` — garbage-collect snapshots
+- `config [view|edit]` — view or edit settings
+- `stop` — stop the daemon
 
 All commands accept `--dir <path>` (default `.`) for the directory containing
 `.snapshots`.

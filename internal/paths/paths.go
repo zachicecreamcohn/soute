@@ -1,7 +1,10 @@
 // Package paths centralizes the on-disk layout of a .snapshots tree.
 package paths
 
-import "path/filepath"
+import (
+	"path/filepath"
+	"strings"
+)
 
 const (
 	// SnapDirName is the hidden directory created adjacent to the target.
@@ -44,4 +47,14 @@ func DataDirPath(snapDir string) string {
 // BlobPath returns the content-addressed object path for a hash.
 func BlobPath(snapDir, hash string) string {
 	return filepath.Join(snapDir, DataDir, hash)
+}
+
+// CleanInput trims whitespace and strips a single surrounding pair of quotes,
+// which users habitually type when pasting Windows paths.
+func CleanInput(s string) string {
+	s = strings.TrimSpace(s)
+	if len(s) >= 2 && (s[0] == '"' || s[0] == '\'') && s[len(s)-1] == s[0] {
+		s = strings.TrimSpace(s[1 : len(s)-1])
+	}
+	return s
 }

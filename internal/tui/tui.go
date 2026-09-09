@@ -11,6 +11,7 @@ import (
 
 	"github.com/zachicecreamcohn/soute/internal/config"
 	"github.com/zachicecreamcohn/soute/internal/manifest"
+	"github.com/zachicecreamcohn/soute/internal/paths"
 	"github.com/zachicecreamcohn/soute/internal/render"
 )
 
@@ -34,7 +35,7 @@ func Init(prefill *config.Config) (*config.Config, error) {
 	))); err != nil {
 		return nil, err
 	}
-	cfg.TargetPath = strings.TrimSpace(target)
+	cfg.TargetPath = paths.CleanInput(target)
 
 	if !useDefaults {
 		if err := numberFields(&cfg); err != nil {
@@ -90,7 +91,7 @@ func InputPath(title string) (string, error) {
 	))); err != nil {
 		return "", err
 	}
-	return strings.TrimSpace(v), nil
+	return paths.CleanInput(v), nil
 }
 
 func snapshotLabel(s manifest.Snapshot) string {
@@ -115,8 +116,12 @@ func targetField(v *string) *huh.Input {
 		Placeholder("./main_show.qlab5").
 		Value(v).
 		Validate(func(s string) error {
-			if strings.TrimSpace(s) == "" {
+			c := paths.CleanInput(s)
+			if c == "" {
 				return errors.New("target path is required")
+			}
+			if strings.Contains(c, "\"") {
+				return errors.New("target path must not contain double quotes")
 			}
 			return nil
 		})

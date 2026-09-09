@@ -15,7 +15,7 @@ func newListCmd() *cobra.Command {
 		Short: "List full snapshot history",
 		Args:  cobra.NoArgs,
 		RunE: func(_ *cobra.Command, _ []string) error {
-			snapDir, err := snapshotsDir()
+			snapDir, err := requireSnapshots()
 			if err != nil {
 				return err
 			}

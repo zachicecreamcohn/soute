@@ -25,11 +25,17 @@ func newInitCmd() *cobra.Command {
 	)
 
 	cmd := &cobra.Command{
-		Use:   "init",
+		Use:   "init [target]",
 		Short: "Create a .snapshots configuration for a target file",
-		Args:  cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, _ []string) error {
-			interactive := !cmd.Flags().Changed("target") &&
+		Args:  cobra.MaximumNArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			targetPath := target
+			if len(args) == 1 {
+				targetPath = args[0]
+			}
+
+			interactive := len(args) == 0 &&
+				!cmd.Flags().Changed("target") &&
 				!cmd.Flags().Changed("min-bytes") &&
 				!cmd.Flags().Changed("min-pct") &&
 				!cmd.Flags().Changed("cooldown") &&
@@ -44,7 +50,7 @@ func newInitCmd() *cobra.Command {
 				cfg = c
 			} else {
 				c := config.Default()
-				c.TargetPath = target
+				c.TargetPath = paths.CleanInput(targetPath)
 				if cmd.Flags().Changed("min-bytes") {
 					c.MinDeltaBytes = minBytes
 				}
@@ -60,8 +66,8 @@ func newInitCmd() *cobra.Command {
 				cfg = &c
 			}
 
-			if strings.TrimSpace(cfg.TargetPath) == "" {
-				return errors.New("target path is required (use --target or run interactively)")
+			if cfg.TargetPath == "" {
+				return errors.New("target path is required (use `soute init <target>` or `--target`)")
 			}
 			return initProject(cfg)
 		},
@@ -76,6 +82,9 @@ func newInitCmd() *cobra.Command {
 }
 
 func initProject(cfg *config.Config) error {
+	if strings.Contains(cfg.TargetPath, "\"") {
+		return fmt.Errorf("invalid target path %q (remove quotes)", cfg.TargetPath)
+	}
 	targetAbs, err := filepath.Abs(cfg.TargetPath)
 	if err != nil {
 		return fmt.Errorf("resolve target: %w", err)

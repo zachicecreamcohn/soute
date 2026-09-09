@@ -20,7 +20,7 @@ func newPruneCmd() *cobra.Command {
 		Short: "Garbage-collect snapshots",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			snapDir, err := snapshotsDir()
+			snapDir, err := requireSnapshots()
 			if err != nil {
 				return err
 			}

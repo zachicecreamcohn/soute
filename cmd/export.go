@@ -16,7 +16,7 @@ func newExportCmd() *cobra.Command {
 		Short: "Export a snapshot to a destination path",
 		Args:  cobra.MaximumNArgs(2),
 		RunE: func(_ *cobra.Command, args []string) error {
-			snapDir, err := snapshotsDir()
+			snapDir, err := requireSnapshots()
 			if err != nil {
 				return err
 			}

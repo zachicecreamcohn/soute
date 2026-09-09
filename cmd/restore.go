@@ -16,7 +16,7 @@ func newRestoreCmd() *cobra.Command {
 		Short: "Restore the target to a previous snapshot",
 		Args:  cobra.MaximumNArgs(1),
 		RunE: func(_ *cobra.Command, args []string) error {
-			snapDir, err := snapshotsDir()
+			snapDir, err := requireSnapshots()
 			if err != nil {
 				return err
 			}
