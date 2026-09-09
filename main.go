@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"soute/cmd"
+	"github.com/zachicecreamcohn/soute/cmd"
 )
 
 func main() {

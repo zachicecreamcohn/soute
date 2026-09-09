@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"soute/internal/ipc"
+	"github.com/zachicecreamcohn/soute/internal/ipc"
 )
 
 func newStopCmd() *cobra.Command {

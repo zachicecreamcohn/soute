@@ -6,10 +6,10 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"soute/internal/config"
-	"soute/internal/ipc"
-	"soute/internal/manifest"
-	"soute/internal/render"
+	"github.com/zachicecreamcohn/soute/internal/config"
+	"github.com/zachicecreamcohn/soute/internal/ipc"
+	"github.com/zachicecreamcohn/soute/internal/manifest"
+	"github.com/zachicecreamcohn/soute/internal/render"
 )
 
 func newStatusCmd() *cobra.Command {

@@ -7,7 +7,7 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"soute/internal/manifest"
+	"github.com/zachicecreamcohn/soute/internal/manifest"
 )
 
 // Snapshots renders snapshots as an aligned terminal table.

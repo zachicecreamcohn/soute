@@ -9,10 +9,10 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"soute/internal/config"
-	"soute/internal/manifest"
-	"soute/internal/paths"
-	"soute/internal/tui"
+	"github.com/zachicecreamcohn/soute/internal/config"
+	"github.com/zachicecreamcohn/soute/internal/manifest"
+	"github.com/zachicecreamcohn/soute/internal/paths"
+	"github.com/zachicecreamcohn/soute/internal/tui"
 )
 
 func newInitCmd() *cobra.Command {

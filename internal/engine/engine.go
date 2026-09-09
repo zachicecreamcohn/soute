@@ -8,9 +8,9 @@ import (
 	"os"
 	"time"
 
-	"soute/internal/config"
-	"soute/internal/manifest"
-	"soute/internal/store"
+	"github.com/zachicecreamcohn/soute/internal/config"
+	"github.com/zachicecreamcohn/soute/internal/manifest"
+	"github.com/zachicecreamcohn/soute/internal/store"
 )
 
 // EvalResult reports the outcome of an evaluation pass.

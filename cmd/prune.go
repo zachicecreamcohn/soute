@@ -5,8 +5,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"soute/internal/config"
-	"soute/internal/engine"
+	"github.com/zachicecreamcohn/soute/internal/config"
+	"github.com/zachicecreamcohn/soute/internal/engine"
 )
 
 func newPruneCmd() *cobra.Command {

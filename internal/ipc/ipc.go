@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"strings"
 
-	"soute/internal/paths"
+	"github.com/zachicecreamcohn/soute/internal/paths"
 )
 
 // Command is a control message sent to the daemon.

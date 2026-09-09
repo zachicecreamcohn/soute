@@ -5,9 +5,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"soute/internal/engine"
-	"soute/internal/manifest"
-	"soute/internal/tui"
+	"github.com/zachicecreamcohn/soute/internal/engine"
+	"github.com/zachicecreamcohn/soute/internal/manifest"
+	"github.com/zachicecreamcohn/soute/internal/tui"
 )
 
 func newRestoreCmd() *cobra.Command {

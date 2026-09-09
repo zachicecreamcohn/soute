@@ -9,9 +9,9 @@ import (
 
 	"github.com/charmbracelet/huh"
 
-	"soute/internal/config"
-	"soute/internal/manifest"
-	"soute/internal/render"
+	"github.com/zachicecreamcohn/soute/internal/config"
+	"github.com/zachicecreamcohn/soute/internal/manifest"
+	"github.com/zachicecreamcohn/soute/internal/render"
 )
 
 // ErrAborted is returned when the user cancels a form before submitting.

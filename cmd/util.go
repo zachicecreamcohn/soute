@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 
-	"soute/internal/ipc"
+	"github.com/zachicecreamcohn/soute/internal/ipc"
 )
 
 // withDaemonPaused pauses the daemon (if running) around fn, resuming it after.

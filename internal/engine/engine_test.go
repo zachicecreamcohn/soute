@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"soute/internal/config"
-	"soute/internal/manifest"
+	"github.com/zachicecreamcohn/soute/internal/config"
+	"github.com/zachicecreamcohn/soute/internal/manifest"
 )
 
 // setup creates a snapshots dir plus a target file, returning the engine and

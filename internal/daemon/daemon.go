@@ -10,9 +10,9 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 
-	"soute/internal/config"
-	"soute/internal/engine"
-	"soute/internal/ipc"
+	"github.com/zachicecreamcohn/soute/internal/config"
+	"github.com/zachicecreamcohn/soute/internal/engine"
+	"github.com/zachicecreamcohn/soute/internal/ipc"
 )
 
 const debounceWindow = 300 * time.Millisecond

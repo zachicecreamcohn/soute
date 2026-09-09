@@ -6,8 +6,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"soute/internal/config"
-	"soute/internal/tui"
+	"github.com/zachicecreamcohn/soute/internal/config"
+	"github.com/zachicecreamcohn/soute/internal/tui"
 )
 
 func newConfigCmd() *cobra.Command {

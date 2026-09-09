@@ -11,7 +11,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"soute/internal/paths"
+	"github.com/zachicecreamcohn/soute/internal/paths"
 )
 
 // HashFile returns the lowercase hex SHA-256 of the file at path.

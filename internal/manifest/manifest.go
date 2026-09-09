@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"time"
 
-	"soute/internal/fsutil"
-	"soute/internal/paths"
+	"github.com/zachicecreamcohn/soute/internal/fsutil"
+	"github.com/zachicecreamcohn/soute/internal/paths"
 )
 
 // Version is the manifest schema version.

@@ -7,10 +7,12 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"soute/internal/paths"
+	"github.com/zachicecreamcohn/soute/internal/paths"
 )
 
-const version = "0.1.0"
+// version is injected at release time via
+// -ldflags "-X github.com/zachicecreamcohn/soute/cmd.version=vX.Y.Z".
+var version = "dev"
 
 var dirFlag string
 

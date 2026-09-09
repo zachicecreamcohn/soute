@@ -1,4 +1,4 @@
-module soute
+module github.com/zachicecreamcohn/soute
 
 go 1.23.0
 

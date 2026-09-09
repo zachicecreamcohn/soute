@@ -5,8 +5,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"soute/internal/manifest"
-	"soute/internal/render"
+	"github.com/zachicecreamcohn/soute/internal/manifest"
+	"github.com/zachicecreamcohn/soute/internal/render"
 )
 
 func newListCmd() *cobra.Command {
