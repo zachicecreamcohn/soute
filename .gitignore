@@ -1,0 +1,14 @@
+# Sandbox-relocated Go caches
+.gocache/
+
+# Build artifacts
+/soute
+/soute.exe
+
+# Runtime data created by the tool under test
+.snapshots/
+
+# Test output
+*.test
+*.out
+coverage.txt

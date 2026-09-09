@@ -1,0 +1,114 @@
+// Package tui hosts the interactive charmbracelet/huh forms.
+package tui
+
+import (
+	"errors"
+	"fmt"
+	"strconv"
+	"strings"
+
+	"github.com/charmbracelet/huh"
+
+	"soute/internal/config"
+)
+
+// ErrAborted is returned when the user cancels a form before submitting.
+var ErrAborted = errors.New("aborted")
+
+// Init runs the setup wizard and returns the resulting configuration. A
+// non-nil prefill reopens the wizard for editing existing settings.
+func Init(prefill *config.Config) (*config.Config, error) {
+	cfg := config.Default()
+	useDefaults := true
+	if prefill != nil {
+		cfg = *prefill
+		useDefaults = false
+	}
+
+	target := cfg.TargetPath
+	if err := run(huh.NewForm(huh.NewGroup(
+		targetField(&target),
+		defaultsField(&useDefaults),
+	))); err != nil {
+		return nil, err
+	}
+	cfg.TargetPath = strings.TrimSpace(target)
+
+	if !useDefaults {
+		if err := numberFields(&cfg); err != nil {
+			return nil, err
+		}
+	}
+	return &cfg, nil
+}
+
+func run(form *huh.Form) error {
+	if err := form.WithTheme(huh.ThemeBase()).Run(); err != nil {
+		if errors.Is(err, huh.ErrUserAborted) {
+			return ErrAborted
+		}
+		return err
+	}
+	return nil
+}
+
+func targetField(v *string) *huh.Input {
+	return huh.NewInput().
+		Title("Target file").
+		Description("Path to the media/bundle file to watch").
+		Placeholder("./main_show.qlab5").
+		Value(v).
+		Validate(func(s string) error {
+			if strings.TrimSpace(s) == "" {
+				return errors.New("target path is required")
+			}
+			return nil
+		})
+}
+
+func defaultsField(v *bool) *huh.Confirm {
+	return huh.NewConfirm().
+		Title("Use recommended defaults?").
+		Description("1 MiB min delta · 2.5% min delta · 5s cooldown · 50 snapshots").
+		Value(v)
+}
+
+func numberFields(cfg *config.Config) error {
+	minBytes := strconv.FormatInt(cfg.MinDeltaBytes, 10)
+	minPct := strconv.FormatFloat(cfg.MinDeltaPct, 'f', 2, 64)
+	cooldown := strconv.Itoa(cfg.CooldownSeconds)
+	maxSnaps := strconv.Itoa(cfg.MaxSnapshots)
+
+	if err := run(huh.NewForm(huh.NewGroup(
+		huh.NewInput().Title("Minimum delta (bytes)").Value(&minBytes).Validate(intValidator("bytes")),
+		huh.NewInput().Title("Minimum delta (%)").Value(&minPct).Validate(floatValidator("%")),
+		huh.NewInput().Title("Cooldown (seconds)").Value(&cooldown).Validate(intValidator("seconds")),
+		huh.NewInput().Title("Max snapshots").Value(&maxSnaps).Validate(intValidator("snapshots")),
+	))); err != nil {
+		return err
+	}
+
+	cfg.MinDeltaBytes, _ = strconv.ParseInt(strings.TrimSpace(minBytes), 10, 64)
+	cfg.MinDeltaPct, _ = strconv.ParseFloat(strings.TrimSpace(minPct), 64)
+	cfg.CooldownSeconds, _ = strconv.Atoi(strings.TrimSpace(cooldown))
+	cfg.MaxSnapshots, _ = strconv.Atoi(strings.TrimSpace(maxSnaps))
+	return nil
+}
+
+func intValidator(unit string) func(string) error {
+	return func(s string) error {
+		if _, err := strconv.Atoi(strings.TrimSpace(s)); err != nil {
+			return fmt.Errorf("must be an integer (%s)", unit)
+		}
+		return nil
+	}
+}
+
+func floatValidator(unit string) func(string) error {
+	return func(s string) error {
+		if _, err := strconv.ParseFloat(strings.TrimSpace(s), 64); err != nil {
+			return fmt.Errorf("must be a number (%s)", unit)
+		}
+		return nil
+	}
+}
