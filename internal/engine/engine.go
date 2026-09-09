@@ -3,6 +3,7 @@
 package engine
 
 import (
+	"fmt"
 	"math"
 	"os"
 	"time"
@@ -85,8 +86,67 @@ func (e *Engine) Evaluate(now time.Time) (EvalResult, *manifest.Snapshot, error)
 	return e.capture(m, cfg, target, size, hash, now, manifest.TagAuto)
 }
 
-// Capture records the current target state unconditionally with the given tag.
-func (e *Engine) Capture(tag string) (*manifest.Snapshot, error) {
+// Find returns the snapshot with the given id.
+func (e *Engine) Find(snapshotID string) (*manifest.Snapshot, error) {
+	m, err := manifest.Load(e.SnapDir)
+	if err != nil {
+		return nil, err
+	}
+	return findSnapshot(m, snapshotID)
+}
+
+// PreRestoreBackup captures the current working file with tag
+// pre_restore_backup when its content differs from the latest entry. It
+// reports whether a backup was created.
+func (e *Engine) PreRestoreBackup() (bool, error) {
+	cfg, err := config.Load(e.SnapDir)
+	if err != nil {
+		return false, err
+	}
+	m, err := manifest.Load(e.SnapDir)
+	if err != nil {
+		return false, err
+	}
+	target := cfg.TargetAbs(e.SnapDir)
+
+	st, err := os.Stat(target)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false, nil
+		}
+		return false, err
+	}
+	hash, err := hashFile(target)
+	if err != nil {
+		return false, err
+	}
+	if last, ok := m.Last(); ok && hash == last.ContentHash {
+		return false, nil
+	}
+
+	if err := store.Put(e.SnapDir, hash, target); err != nil {
+		return false, err
+	}
+
+	now := time.Now()
+	snap := manifest.Snapshot{
+		ID:          m.NextID(now),
+		Timestamp:   now.UTC().Format(time.RFC3339),
+		ContentHash: hash,
+		SizeBytes:   st.Size(),
+		Tag:         manifest.TagPreRestoreBackup,
+	}
+	applyDelta(m, &snap, snap.SizeBytes)
+	m.Append(snap)
+	if err := m.Save(e.SnapDir); err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+// Restore replaces the target with the given snapshot's content and logs a
+// restore entry.
+func (e *Engine) Restore(snapshotID string) (*manifest.Snapshot, error) {
 	cfg, err := config.Load(e.SnapDir)
 	if err != nil {
 		return nil, err
@@ -95,19 +155,43 @@ func (e *Engine) Capture(tag string) (*manifest.Snapshot, error) {
 	if err != nil {
 		return nil, err
 	}
+	chosen, err := findSnapshot(m, snapshotID)
+	if err != nil {
+		return nil, err
+	}
 	target := cfg.TargetAbs(e.SnapDir)
 
-	size, err := statSize(target)
-	if err != nil {
-		return nil, err
-	}
-	hash, err := hashFile(target)
-	if err != nil {
+	if err := store.RestoreTo(e.SnapDir, chosen.ContentHash, target); err != nil {
 		return nil, err
 	}
 
-	_, snap, err := e.capture(m, cfg, target, size, hash, time.Now(), tag)
-	return snap, err
+	now := time.Now()
+	entry := manifest.Snapshot{
+		ID:          m.NextID(now),
+		Timestamp:   now.UTC().Format(time.RFC3339),
+		ContentHash: chosen.ContentHash,
+		SizeBytes:   chosen.SizeBytes,
+		Tag:         manifest.TagRestore,
+	}
+	applyDelta(m, &entry, entry.SizeBytes)
+	m.Append(entry)
+	if err := m.Save(e.SnapDir); err != nil {
+		return nil, err
+	}
+	return &entry, nil
+}
+
+// Export copies a snapshot blob to dst, leaving the working file untouched.
+func (e *Engine) Export(snapshotID, dst string) error {
+	m, err := manifest.Load(e.SnapDir)
+	if err != nil {
+		return err
+	}
+	chosen, err := findSnapshot(m, snapshotID)
+	if err != nil {
+		return err
+	}
+	return store.ExportTo(e.SnapDir, chosen.ContentHash, dst)
 }
 
 func (e *Engine) capture(m *manifest.Manifest, cfg *config.Config, target string, size int64, hash string, now time.Time, tag string) (EvalResult, *manifest.Snapshot, error) {
@@ -122,12 +206,7 @@ func (e *Engine) capture(m *manifest.Manifest, cfg *config.Config, target string
 		SizeBytes:   size,
 		Tag:         tag,
 	}
-	if last, ok := m.Last(); ok {
-		snap.DeltaBytes = size - last.SizeBytes
-		if last.SizeBytes > 0 {
-			snap.DeltaPct = round2(float64(snap.DeltaBytes) / float64(last.SizeBytes) * 100)
-		}
-	}
+	applyDelta(m, &snap, size)
 	m.Append(snap)
 
 	if cfg.MaxSnapshots > 0 {
@@ -169,6 +248,25 @@ func (e *Engine) collect(removed []manifest.Snapshot, referenced map[string]bool
 	for _, s := range removed {
 		if !referenced[s.ContentHash] {
 			store.Delete(e.SnapDir, s.ContentHash)
+		}
+	}
+}
+
+func findSnapshot(m *manifest.Manifest, id string) (*manifest.Snapshot, error) {
+	for i := range m.Snapshots {
+		if m.Snapshots[i].ID == id {
+			return &m.Snapshots[i], nil
+		}
+	}
+	return nil, fmt.Errorf("snapshot %q not found", id)
+}
+
+// applyDelta fills a snapshot's delta fields relative to the latest entry.
+func applyDelta(m *manifest.Manifest, snap *manifest.Snapshot, size int64) {
+	if last, ok := m.Last(); ok {
+		snap.DeltaBytes = size - last.SizeBytes
+		if last.SizeBytes > 0 {
+			snap.DeltaPct = round2(float64(snap.DeltaBytes) / float64(last.SizeBytes) * 100)
 		}
 	}
 }

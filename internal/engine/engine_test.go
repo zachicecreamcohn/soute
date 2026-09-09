@@ -236,3 +236,107 @@ func TestPruneAll(t *testing.T) {
 		t.Fatalf("snapshot count = %d, want 1", len(m.Snapshots))
 	}
 }
+
+func TestPreRestoreBackup(t *testing.T) {
+	cfg := config.Default()
+	cfg.CooldownSeconds = 0
+	cfg.MinDeltaBytes = 0
+	cfg.MinDeltaPct = 0
+	e, target := setup(t, cfg, []byte("saved"))
+
+	if _, _, err := e.Evaluate(time.Now()); err != nil {
+		t.Fatal(err)
+	}
+	// Unsaved change since the last snapshot.
+	writeTarget(t, target, []byte("unsaved work"))
+
+	backedUp, err := e.PreRestoreBackup()
+	if err != nil || !backedUp {
+		t.Fatalf("PreRestoreBackup = %v, %v; want true, nil", backedUp, err)
+	}
+	m := loadManifest(t, e)
+	if len(m.Snapshots) != 2 {
+		t.Fatalf("snapshot count = %d, want 2", len(m.Snapshots))
+	}
+	if m.Snapshots[1].Tag != manifest.TagPreRestoreBackup {
+		t.Fatalf("tag = %q, want %q", m.Snapshots[1].Tag, manifest.TagPreRestoreBackup)
+	}
+	// No further change, so a second call must be a no-op.
+	if backedUp, err = e.PreRestoreBackup(); err != nil || backedUp {
+		t.Fatalf("second PreRestoreBackup = %v, %v; want false, nil", backedUp, err)
+	}
+}
+
+func TestRestore(t *testing.T) {
+	cfg := config.Default()
+	cfg.CooldownSeconds = 0
+	cfg.MinDeltaBytes = 0
+	cfg.MinDeltaPct = 0
+	e, target := setup(t, cfg, []byte("v1"))
+
+	if _, _, err := e.Evaluate(time.Now()); err != nil {
+		t.Fatal(err)
+	}
+	writeTarget(t, target, []byte("v2-longer"))
+	if _, _, err := e.Evaluate(time.Now().Add(time.Second)); err != nil {
+		t.Fatal(err)
+	}
+
+	v1 := loadManifest(t, e).Snapshots[0]
+
+	// Simulate unsaved edits, then restore v1.
+	writeTarget(t, target, []byte("unsaved-v3-edits"))
+	if _, err := e.PreRestoreBackup(); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := e.Restore(v1.ID); err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := os.ReadFile(target)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(got) != "v1" {
+		t.Fatalf("target = %q, want %q", got, "v1")
+	}
+
+	m := loadManifest(t, e)
+	if len(m.Snapshots) != 4 {
+		t.Fatalf("snapshot count = %d, want 4", len(m.Snapshots))
+	}
+	if m.Snapshots[2].Tag != manifest.TagPreRestoreBackup {
+		t.Fatalf("entry 2 tag = %q, want pre_restore_backup", m.Snapshots[2].Tag)
+	}
+	if m.Snapshots[3].Tag != manifest.TagRestore {
+		t.Fatalf("entry 3 tag = %q, want restore", m.Snapshots[3].Tag)
+	}
+	if m.Snapshots[3].ContentHash != v1.ContentHash {
+		t.Fatal("restore entry hash does not match the restored snapshot")
+	}
+}
+
+func TestExport(t *testing.T) {
+	cfg := config.Default()
+	e, target := setup(t, cfg, []byte("export content"))
+
+	if _, _, err := e.Evaluate(time.Now()); err != nil {
+		t.Fatal(err)
+	}
+	id := loadManifest(t, e).Snapshots[0].ID
+
+	dst := filepath.Join(t.TempDir(), "out.bin")
+	if err := e.Export(id, dst); err != nil {
+		t.Fatal(err)
+	}
+	got, err := os.ReadFile(dst)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(got) != "export content" {
+		t.Fatalf("export = %q, want %q", got, "export content")
+	}
+	if gotTarget, _ := os.ReadFile(target); string(gotTarget) != "export content" {
+		t.Fatal("export mutated the working file")
+	}
+}

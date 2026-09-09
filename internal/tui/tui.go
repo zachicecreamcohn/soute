@@ -10,6 +10,8 @@ import (
 	"github.com/charmbracelet/huh"
 
 	"soute/internal/config"
+	"soute/internal/manifest"
+	"soute/internal/render"
 )
 
 // ErrAborted is returned when the user cancels a form before submitting.
@@ -40,6 +42,60 @@ func Init(prefill *config.Config) (*config.Config, error) {
 		}
 	}
 	return &cfg, nil
+}
+
+// SelectSnapshot presents the history (newest first) for selection.
+func SelectSnapshot(snapshots []manifest.Snapshot) (*manifest.Snapshot, error) {
+	if len(snapshots) == 0 {
+		return nil, errors.New("no snapshots available")
+	}
+
+	var selected string
+	opts := make([]huh.Option[string], 0, len(snapshots))
+	for i := len(snapshots) - 1; i >= 0; i-- {
+		s := snapshots[i]
+		opts = append(opts, huh.NewOption(snapshotLabel(s), s.ID))
+	}
+
+	if err := run(huh.NewForm(huh.NewGroup(
+		huh.NewSelect[string]().
+			Title("Select snapshot").
+			Options(opts...).
+			Value(&selected),
+	))); err != nil {
+		return nil, err
+	}
+
+	for i := range snapshots {
+		if snapshots[i].ID == selected {
+			return &snapshots[i], nil
+		}
+	}
+	return nil, fmt.Errorf("snapshot %q not found", selected)
+}
+
+// InputPath prompts for a filesystem path.
+func InputPath(title string) (string, error) {
+	var v string
+	if err := run(huh.NewForm(huh.NewGroup(
+		huh.NewInput().
+			Title(title).
+			Value(&v).
+			Validate(func(s string) error {
+				if strings.TrimSpace(s) == "" {
+					return errors.New("path is required")
+				}
+				return nil
+			}),
+	))); err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(v), nil
+}
+
+func snapshotLabel(s manifest.Snapshot) string {
+	return fmt.Sprintf("%s  %s  %s  %+.1f%%  %s",
+		s.ID, render.ShortTime(s.Timestamp), render.HumanBytes(s.SizeBytes), s.DeltaPct, s.Tag)
 }
 
 func run(form *huh.Form) error {

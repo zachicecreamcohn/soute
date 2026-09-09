@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	pingTimeout  = 500 * time.Millisecond
-	sendTimeout  = 3 * time.Second
+	pingTimeout = 500 * time.Millisecond
+	sendTimeout = 3 * time.Second
 )
 
 type pipeServer struct {

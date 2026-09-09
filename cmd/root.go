@@ -29,6 +29,11 @@ func NewRootCmd() *cobra.Command {
 		newWatchCmd(),
 		newStopCmd(),
 		newStatusCmd(),
+		newListCmd(),
+		newRestoreCmd(),
+		newExportCmd(),
+		newPruneCmd(),
+		newConfigCmd(),
 	)
 	return root
 }
