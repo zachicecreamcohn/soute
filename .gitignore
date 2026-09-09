@@ -8,6 +8,9 @@
 # Runtime data created by the tool under test
 .snapshots/
 
+# Local smoke-test scratch
+.smoke/
+
 # Test output
 *.test
 *.out

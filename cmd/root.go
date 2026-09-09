@@ -24,7 +24,12 @@ func NewRootCmd() *cobra.Command {
 		SilenceErrors: true,
 	}
 	root.PersistentFlags().StringVarP(&dirFlag, "dir", "d", ".", "directory containing the .snapshots folder")
-	root.AddCommand(newInitCmd())
+	root.AddCommand(
+		newInitCmd(),
+		newWatchCmd(),
+		newStopCmd(),
+		newStatusCmd(),
+	)
 	return root
 }
 
