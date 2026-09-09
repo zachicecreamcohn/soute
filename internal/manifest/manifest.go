@@ -103,9 +103,15 @@ func (m *Manifest) NextID(now time.Time) string {
 }
 
 // Trim keeps only the newest keep snapshots and returns the removed ones so
-// their (now possibly orphaned) blobs can be garbage collected.
+// their (now possibly orphaned) blobs can be garbage collected. A non-positive
+// keep removes every snapshot.
 func (m *Manifest) Trim(keep int) []Snapshot {
-	if keep <= 0 || len(m.Snapshots) <= keep {
+	if keep <= 0 {
+		removed := m.Snapshots
+		m.Snapshots = nil
+		return removed
+	}
+	if len(m.Snapshots) <= keep {
 		return nil
 	}
 	cut := len(m.Snapshots) - keep
