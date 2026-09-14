@@ -1,14 +1,19 @@
 # soute
 
-Zero-friction project file versioning.
+`soute` is a small background CLI that versions a single project file. Point it
+at something like a QLab `.qlab5` file and it saves a content-addressed, deduplicated snapshot on every change.
 
-`soute` is a background CLI that watches a **single structural project file**
-(QLab `.qlab5` databases, WATCHOUT show files, Ableton `.als` sets) and
-automatically creates content-addressed, deduplicated snapshots. It deliberately
-ignores directories and bundled media so it never burns CPU or disk tracking
-heavy assets.
+## Why
 
-## Install
+As a software engineer, I love git for versioning. But for my theatre work, I work exclusively with binary files (e.g. `.watchout`, `.qlab5`, `.millumin`) which have varying levels of versioning.
+
+I built this tool as a standard versioning system for working with these files. It's cross-platform, simple to use, and hopefully helpful to others!
+
+
+### The name?
+"Soute" in French means a cargo hold. When we do a snapshot of a project file, we're adding it to our "hold" of backups! Also it sounds cool.
+
+## Installation
 
 ```sh
 # From source
@@ -24,49 +29,66 @@ scoop bucket add zachicecreamcohn https://github.com/zachicecreamcohn/scoop-buck
 scoop install soute
 ```
 
-> **Note:** `soute watch` re-executes itself in the background, so it requires a
-> real binary (built or installed), not `go run`. `go run` re-execs a temporary
-> binary that is deleted immediately.
+> `soute watch` re-executes itself in the background, so it needs a real binary —
+> install it first, not `go run`.
 
-## Quick start
+## Usage
+
+### Initialize
+
+Point soute at your project file:
 
 ```sh
-soute init show.qlab5      # create the .soute_show.qlab5/ namespace
-soute watch show.qlab5     # fork the detached daemon
-soute status               # daemon health + 3 most recent snapshots
-soute list                 # full snapshot history (ID, timestamp, size)
-soute backup show.qlab5    # manual snapshot now (add -t "label" to tag it)
-soute restore show.qlab5   # interactive picker (or pass an ID to skip it)
-soute stop                 # clean shutdown
-soute prune                # reference-counted garbage collection
+soute init show.qlab5
 ```
 
-Each tracked file gets a namespaced `.soute_<filename>/` directory beside it:
+This creates a `.soute_show.qlab5/` directory next to it:
 
 ```text
 .soute_show.qlab5/
-├── config.json     # target path, debounce, snapshot interval, snapshot limit
-├── daemon.json     # daemon pid + IPC endpoint (while running)
-├── manifest.json   # index of snapshots (id → content hash)
-└── data/           # content-addressed blob store (SHA-256)
+├── config.json     # your settings
+├── daemon.json     # daemon state (only while running)
+├── manifest.json   # snapshot index
+└── data/           # content-addressed snapshot blobs (SHA-256)
 ```
 
-## How it works
+`init` writes `config.json` with safe defaults:
 
-- **Strict single-file targeting** — the watcher ignores every sibling/media
-  event, so rendering assets never wake evaluation.
-- **Deferred hashing** — an mtime check and a minimum-interval threshold gate
-  the expensive SHA-256 pass; identical content deduplicates against the last
-  snapshot.
-- **Atomic & deduplicated** — snapshots are written via temp-file + `fsync` +
-  rename; identical saves share one blob.
-- **Reference-counted GC** — `prune` deletes a blob only when no surviving
-  snapshot references it.
-- **Native IPC** — Unix domain sockets (macOS/Linux) and named pipes (Windows),
-  with zero network.
+```json
+{
+  "target_path": "/path/to/show.qlab5",
+  "min_interval_seconds": 300,
+  "debounce_ms": 300,
+  "max_snapshots": 50
+}
+```
 
-## Configuration
+`min_interval_seconds` is the minimum gap between snapshots (set it to `0` to
+snapshot on every change); `debounce_ms` absorbs rapid atomic-save events; and
+`max_snapshots` caps how many snapshots are kept (if `50`, we keep only the `50` most recent backups).
 
-`config.json` defaults: `debounce_ms: 300`, `min_interval_seconds: 300`,
-`max_snapshots: 50`. Set `min_interval_seconds: 0` to snapshot on every content
-change.
+### Watch
+Start watching the file for saves
+
+```sh
+soute watch show.qlab5
+```
+
+### Manual Saves
+
+You don't have to wait for a change. Save the current state now and tag it:
+
+```sh
+soute backup show.qlab5 -t "Tech day 1 EOD"
+```
+
+Tags show up in the restore picker.
+
+### Restore
+To restore the file to a backed up point:
+
+```sh
+soute restore show.qlab5
+```
+
+This opens a TUI to pick from backups. When restoring, we automatically save a pre-restore snapshot just in case.
