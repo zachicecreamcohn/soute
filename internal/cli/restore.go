@@ -13,6 +13,7 @@ import (
 	"github.com/zacharycohn/soute/internal/hashing"
 	"github.com/zacharycohn/soute/internal/ipc"
 	"github.com/zacharycohn/soute/internal/store"
+	"github.com/zacharycohn/soute/internal/tui"
 	"github.com/zacharycohn/soute/internal/watcher"
 )
 
@@ -44,7 +45,7 @@ func runRestore(cmd *cobra.Command, pathArg, id string) error {
 		return fmt.Errorf("no snapshots to restore")
 	}
 
-	snap, err := selectSnapshot(cmd, m, id)
+	snap, err := selectSnapshot(m, id)
 	if err != nil {
 		return err
 	}
@@ -120,7 +121,7 @@ func runRestore(cmd *cobra.Command, pathArg, id string) error {
 
 // selectSnapshot resolves the target snapshot: by id when given, otherwise via
 // the interactive picker (Phase 5).
-func selectSnapshot(cmd *cobra.Command, m store.Manifest, id string) (store.Snapshot, error) {
+func selectSnapshot(m store.Manifest, id string) (store.Snapshot, error) {
 	if id != "" {
 		s, ok := store.FindByID(m, id)
 		if !ok {
@@ -128,7 +129,30 @@ func selectSnapshot(cmd *cobra.Command, m store.Manifest, id string) (store.Snap
 		}
 		return s, nil
 	}
-	return store.Snapshot{}, fmt.Errorf("no snapshot id provided")
+
+	if !isTTY(os.Stdout) {
+		return store.Snapshot{}, fmt.Errorf("no snapshot id provided (run interactively to pick one)")
+	}
+
+	sorted := store.SortByTimestampDesc(m.Snapshots)
+	items := make([]tui.Item, len(sorted))
+	for i, s := range sorted {
+		items[i] = tui.Item{ID: s.ID, Timestamp: s.Timestamp.UTC().Format(time.RFC3339), Size: s.SizeBytes}
+	}
+	idx, err := tui.Pick(items)
+	if err != nil {
+		return store.Snapshot{}, err
+	}
+	return sorted[idx], nil
+}
+
+// isTTY reports whether f is a character device (an interactive terminal).
+func isTTY(f *os.File) bool {
+	fi, err := f.Stat()
+	if err != nil {
+		return false
+	}
+	return fi.Mode()&os.ModeCharDevice != 0
 }
 
 // copyToFile copies src to dstPath, fsyncs, and applies perm.
