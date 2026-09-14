@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/zacharycohn/soute/internal/config"
-	"github.com/zacharycohn/soute/internal/hashing"
-	"github.com/zacharycohn/soute/internal/store"
+	"github.com/zachicecreamcohn/soute/internal/config"
+	"github.com/zachicecreamcohn/soute/internal/hashing"
+	"github.com/zachicecreamcohn/soute/internal/store"
 )
 
 type fakeInfo struct{ mtime time.Time }

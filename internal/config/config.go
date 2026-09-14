@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/zacharycohn/soute/internal/atomicwrite"
+	"github.com/zachicecreamcohn/soute/internal/atomicwrite"
 )
 
 // Safe defaults applied by `soute init` (spec §6).

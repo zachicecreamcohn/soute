@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/zacharycohn/soute/internal/atomicwrite"
+	"github.com/zachicecreamcohn/soute/internal/atomicwrite"
 )
 
 // Status values.

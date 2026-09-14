@@ -12,7 +12,7 @@ builds:
     env:
       - CGO_ENABLED=0
     ldflags:
-      - -s -w -X github.com/zacharycohn/soute/internal/cli.Version={{.Version}}
+      - -s -w -X github.com/zachicecreamcohn/soute/internal/cli.Version={{.Version}}
     goos:
       - darwin
       - windows
@@ -32,9 +32,9 @@ archives:
 brews:
   - name: soute
     repository:
-      owner: zacharycohn
+      owner: zachicecreamcohn
       name: homebrew-tap
-    homepage: "https://github.com/zacharycohn/soute"
+    homepage: "https://github.com/zachicecreamcohn/soute"
     description: "Zero-friction project file versioning"
     license: MIT
 
@@ -42,9 +42,9 @@ brews:
 scoop:
   - name: soute
     bucket:
-      owner: zacharycohn
+      owner: zachicecreamcohn
       name: scoop-bucket
-    homepage: "https://github.com/zacharycohn/soute"
+    homepage: "https://github.com/zachicecreamcohn/soute"
     description: "Zero-friction project file versioning"
     license: MIT
 

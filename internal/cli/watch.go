@@ -8,10 +8,10 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/zacharycohn/soute/internal/config"
-	"github.com/zacharycohn/soute/internal/ipc"
-	"github.com/zacharycohn/soute/internal/process"
-	"github.com/zacharycohn/soute/internal/state"
+	"github.com/zachicecreamcohn/soute/internal/config"
+	"github.com/zachicecreamcohn/soute/internal/ipc"
+	"github.com/zachicecreamcohn/soute/internal/process"
+	"github.com/zachicecreamcohn/soute/internal/state"
 )
 
 func newWatchCmd() *cobra.Command {

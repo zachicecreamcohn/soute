@@ -6,7 +6,7 @@ import (
 )
 
 // Version is the build version, injected at build time via
-// -ldflags "-X github.com/zacharycohn/soute/internal/cli.Version=vX.Y.Z".
+// -ldflags "-X github.com/zachicecreamcohn/soute/internal/cli.Version=vX.Y.Z".
 var Version = "dev"
 
 // NewRootCmd builds the soute command tree.

@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/zacharycohn/soute/internal/ipc"
+	"github.com/zachicecreamcohn/soute/internal/ipc"
 )
 
 // ping connects to the daemon at addr and reports whether it responds.

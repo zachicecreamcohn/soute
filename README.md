@@ -12,14 +12,14 @@ heavy assets.
 
 ```sh
 # From source
-go install github.com/zacharycohn/soute/cmd/soute@latest
+go install github.com/zachicecreamcohn/soute/cmd/soute@latest
 
 # macOS (Homebrew)
-brew tap zacharycohn/homebrew-tap
+brew tap zachicecreamcohn/homebrew-tap
 brew install soute
 
 # Windows (Scoop)
-scoop bucket add zacharycohn https://github.com/zacharycohn/scoop-bucket
+scoop bucket add zachicecreamcohn https://github.com/zachicecreamcohn/scoop-bucket
 scoop install soute
 ```
 

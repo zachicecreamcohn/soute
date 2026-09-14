@@ -1,6 +1,6 @@
 BINARY  := soute
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
-LDFLAGS := -s -w -X github.com/zacharycohn/soute/internal/cli.Version=$(VERSION)
+LDFLAGS := -s -w -X github.com/zachicecreamcohn/soute/internal/cli.Version=$(VERSION)
 
 .PHONY: build test vet cross clean
 

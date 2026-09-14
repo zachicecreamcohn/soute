@@ -10,11 +10,11 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/zacharycohn/soute/internal/hashing"
-	"github.com/zacharycohn/soute/internal/ipc"
-	"github.com/zacharycohn/soute/internal/store"
-	"github.com/zacharycohn/soute/internal/tui"
-	"github.com/zacharycohn/soute/internal/watcher"
+	"github.com/zachicecreamcohn/soute/internal/hashing"
+	"github.com/zachicecreamcohn/soute/internal/ipc"
+	"github.com/zachicecreamcohn/soute/internal/store"
+	"github.com/zachicecreamcohn/soute/internal/tui"
+	"github.com/zachicecreamcohn/soute/internal/watcher"
 )
 
 func newRestoreCmd() *cobra.Command {

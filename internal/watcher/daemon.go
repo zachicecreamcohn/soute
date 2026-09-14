@@ -10,9 +10,9 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 
-	"github.com/zacharycohn/soute/internal/config"
-	"github.com/zacharycohn/soute/internal/ipc"
-	"github.com/zacharycohn/soute/internal/state"
+	"github.com/zachicecreamcohn/soute/internal/config"
+	"github.com/zachicecreamcohn/soute/internal/ipc"
+	"github.com/zachicecreamcohn/soute/internal/state"
 )
 
 // Run starts the daemon: fsnotify watcher, debounce/evaluation loop, and IPC

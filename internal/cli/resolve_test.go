@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/zacharycohn/soute/internal/config"
+	"github.com/zachicecreamcohn/soute/internal/config"
 )
 
 func TestResolvePathsExplicit(t *testing.T) {

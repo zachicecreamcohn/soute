@@ -10,7 +10,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/zacharycohn/soute/internal/atomicwrite"
+	"github.com/zachicecreamcohn/soute/internal/atomicwrite"
 )
 
 // ManifestVersion is the on-disk schema version (spec §3.2).

@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/zacharycohn/soute/internal/config"
+	"github.com/zachicecreamcohn/soute/internal/config"
 )
 
 // resolvePaths returns the derived Paths for an explicit target arg, or

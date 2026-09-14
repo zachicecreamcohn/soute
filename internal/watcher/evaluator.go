@@ -8,9 +8,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/zacharycohn/soute/internal/config"
-	"github.com/zacharycohn/soute/internal/hashing"
-	"github.com/zacharycohn/soute/internal/store"
+	"github.com/zachicecreamcohn/soute/internal/config"
+	"github.com/zachicecreamcohn/soute/internal/hashing"
+	"github.com/zachicecreamcohn/soute/internal/store"
 )
 
 // Outcome is the result of a single evaluation pass.

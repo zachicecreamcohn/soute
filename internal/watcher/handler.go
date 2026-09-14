@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/zacharycohn/soute/internal/config"
-	"github.com/zacharycohn/soute/internal/ipc"
-	"github.com/zacharycohn/soute/internal/store"
+	"github.com/zachicecreamcohn/soute/internal/config"
+	"github.com/zachicecreamcohn/soute/internal/ipc"
+	"github.com/zachicecreamcohn/soute/internal/store"
 )
 
 // Handler serves IPC commands for a running daemon.
