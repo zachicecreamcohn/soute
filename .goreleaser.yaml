@@ -22,11 +22,11 @@ builds:
       - arm64
 
 archives:
-  - format: tar.gz
+  - formats: ["tar.gz"]
     name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     format_overrides:
       - goos: windows
-        format: zip
+        formats: ["zip"]
 
 # Homebrew tap (macOS). The target repo must exist under the given owner.
 brews:
@@ -39,9 +39,9 @@ brews:
     license: MIT
 
 # Scoop bucket (Windows). The target repo must exist under the given owner.
-scoop:
+scoops:
   - name: soute
-    bucket:
+    repository:
       owner: zachicecreamcohn
       name: scoop-bucket
     homepage: "https://github.com/zachicecreamcohn/soute"
