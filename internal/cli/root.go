@@ -21,6 +21,7 @@ func NewRootCmd() *cobra.Command {
 		newStopCmd(),
 		newStatusCmd(),
 		newListCmd(),
+		newRestoreCmd(),
 		newPruneCmd(),
 		newDaemonCmd(),
 	)

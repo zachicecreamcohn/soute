@@ -21,3 +21,16 @@ func ping(addr string) (bool, error) {
 	}
 	return true, nil
 }
+
+// sendIPC dials the daemon, sends one command, and closes the connection.
+func sendIPC(addr, cmd string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	c, err := ipc.DialClient(ctx, addr)
+	if err != nil {
+		return err
+	}
+	defer c.Close()
+	_, err = c.Call(ctx, cmd, nil)
+	return err
+}
