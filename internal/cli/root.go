@@ -17,7 +17,10 @@ func NewRootCmd() *cobra.Command {
 	}
 	root.AddCommand(
 		newInitCmd(),
+		newWatchCmd(),
+		newStopCmd(),
 		newPruneCmd(),
+		newDaemonCmd(),
 	)
 	return root
 }

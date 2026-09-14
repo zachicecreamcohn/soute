@@ -21,7 +21,7 @@ import (
 func Run(ctx context.Context, paths config.Paths, cfg config.Config) error {
 	// Canonicalize the target for watching so symlink aliases (e.g. /var vs
 	// /private/var on macOS) don't cause event-filter mismatches. The namespace
-	// and endpoint are left on the original logical paths for CLI consistency.
+	// and endpoint stay on the original logical paths for CLI consistency.
 	watchPaths := paths
 	if real, err := filepath.EvalSymlinks(paths.TargetAbs); err == nil {
 		watchPaths.TargetAbs = real
@@ -32,6 +32,19 @@ func Run(ctx context.Context, paths config.Paths, cfg config.Config) error {
 	}
 
 	eval := NewEvaluator(watchPaths, cfg)
+
+	// Set up fsnotify before announcing readiness so watch failures surface
+	// during startup rather than after the daemon reports "started".
+	w, err := fsnotify.NewWatcher()
+	if err != nil {
+		return fmt.Errorf("new watcher: %w", err)
+	}
+	defer w.Close()
+	if err := w.Add(watchPaths.TargetDir); err != nil {
+		if err2 := w.Add(watchPaths.TargetAbs); err2 != nil {
+			return fmt.Errorf("watch target: %w (dir: %v)", err2, err)
+		}
+	}
 
 	addr := ipc.EndpointFor(paths.Namespace, paths.TargetAbs)
 	ipc.Cleanup(addr)
@@ -64,17 +77,6 @@ func Run(ctx context.Context, paths config.Paths, cfg config.Config) error {
 
 	serveErr := make(chan error, 1)
 	go func() { serveErr <- ipc.Serve(ln, handler) }()
-
-	w, err := fsnotify.NewWatcher()
-	if err != nil {
-		return fmt.Errorf("new watcher: %w", err)
-	}
-	defer w.Close()
-	if err := w.Add(watchPaths.TargetDir); err != nil {
-		if err2 := w.Add(watchPaths.TargetAbs); err2 != nil {
-			return fmt.Errorf("watch target: %w (dir: %v)", err2, err)
-		}
-	}
 
 	deb := NewDebounce(time.Duration(cfg.DebounceMS)*time.Millisecond, nil)
 	defer deb.Stop()
