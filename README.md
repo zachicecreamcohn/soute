@@ -29,9 +29,6 @@ scoop bucket add zachicecreamcohn https://github.com/zachicecreamcohn/scoop-buck
 scoop install soute
 ```
 
-> `soute watch` re-executes itself in the background, so it needs a real binary —
-> install it first, not `go run`.
-
 ## Usage
 
 ### Initialize
