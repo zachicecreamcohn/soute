@@ -11,8 +11,8 @@ func TestDefault(t *testing.T) {
 	if c.TargetPath != "/abs/MainShow.qlab5" {
 		t.Errorf("TargetPath = %q", c.TargetPath)
 	}
-	if c.MaxTimeSeconds != 300 {
-		t.Errorf("MaxTimeSeconds = %d", c.MaxTimeSeconds)
+	if c.MinIntervalSeconds != 300 {
+		t.Errorf("MinIntervalSeconds = %d", c.MinIntervalSeconds)
 	}
 	if c.DebounceMS != 300 {
 		t.Errorf("DebounceMS = %d", c.DebounceMS)
@@ -36,7 +36,7 @@ func TestValidate(t *testing.T) {
 		{"debounce zero", func(c *Config) { c.DebounceMS = 0 }},
 		{"debounce negative", func(c *Config) { c.DebounceMS = -1 }},
 		{"max snapshots zero", func(c *Config) { c.MaxSnapshots = 0 }},
-		{"max time negative", func(c *Config) { c.MaxTimeSeconds = -1 }},
+		{"min interval negative", func(c *Config) { c.MinIntervalSeconds = -1 }},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -52,7 +52,7 @@ func TestValidate(t *testing.T) {
 func TestSaveLoadRoundTrip(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.json")
 	c := Default("/abs/MainShow.qlab5")
-	c.MaxTimeSeconds = 60
+	c.MinIntervalSeconds = 60
 	if err := c.Save(path); err != nil {
 		t.Fatalf("Save: %v", err)
 	}

@@ -37,7 +37,7 @@ type Deps struct {
 }
 
 // Evaluator runs the deferred-hash evaluation pipeline (spec §5.3). Hashing is
-// deferred until the mtime and elapsed-time gates pass.
+// deferred until the mtime and minimum-interval gates pass.
 type Evaluator struct {
 	TargetPath string
 	DataDir    string
@@ -130,7 +130,7 @@ func (e *Evaluator) Evaluate() (Outcome, store.Snapshot, error) {
 		e.mu.Unlock()
 		return OutcomeAbortedMTime, store.Snapshot{}, nil
 	}
-	within := e.withinTimeWindow(now)
+	within := e.withinInterval(now)
 	e.mu.Unlock()
 	if within {
 		return OutcomeAbortedTime, store.Snapshot{}, nil
@@ -217,11 +217,11 @@ func (e *Evaluator) now() time.Time {
 	return time.Now()
 }
 
-func (e *Evaluator) withinTimeWindow(now time.Time) bool {
-	if e.Config.MaxTimeSeconds == 0 {
-		return false // 0 disables the elapsed-time gate
+func (e *Evaluator) withinInterval(now time.Time) bool {
+	if e.Config.MinIntervalSeconds == 0 {
+		return false // 0 disables the minimum-interval gate
 	}
-	return now.Sub(e.lastSnapshotTime) < time.Duration(e.Config.MaxTimeSeconds)*time.Second
+	return now.Sub(e.lastSnapshotTime) < time.Duration(e.Config.MinIntervalSeconds)*time.Second
 }
 
 func newSnapshotID(t time.Time) string {

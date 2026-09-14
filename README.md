@@ -44,7 +44,7 @@ Each tracked file gets a namespaced `.soute_<filename>/` directory beside it:
 
 ```text
 .soute_show.qlab5/
-├── config.json     # target path, debounce, time threshold, snapshot limit
+├── config.json     # target path, debounce, snapshot interval, snapshot limit
 ├── daemon.json     # daemon pid + IPC endpoint (while running)
 ├── manifest.json   # index of snapshots (id → content hash)
 └── data/           # content-addressed blob store (SHA-256)
@@ -54,8 +54,8 @@ Each tracked file gets a namespaced `.soute_<filename>/` directory beside it:
 
 - **Strict single-file targeting** — the watcher ignores every sibling/media
   event, so rendering assets never wake evaluation.
-- **Deferred hashing** — an mtime check and an elapsed-time threshold gate the
-  expensive SHA-256 pass; identical content deduplicates against the last
+- **Deferred hashing** — an mtime check and a minimum-interval threshold gate
+  the expensive SHA-256 pass; identical content deduplicates against the last
   snapshot.
 - **Atomic & deduplicated** — snapshots are written via temp-file + `fsync` +
   rename; identical saves share one blob.
@@ -66,6 +66,6 @@ Each tracked file gets a namespaced `.soute_<filename>/` directory beside it:
 
 ## Configuration
 
-`config.json` defaults: `debounce_ms: 300`, `max_time_seconds: 300`,
-`max_snapshots: 50`. Set `max_time_seconds: 0` to snapshot on every content
+`config.json` defaults: `debounce_ms: 300`, `min_interval_seconds: 300`,
+`max_snapshots: 50`. Set `min_interval_seconds: 0` to snapshot on every content
 change.

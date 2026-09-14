@@ -15,9 +15,9 @@ import (
 
 // Safe defaults applied by `soute init` (spec §6).
 const (
-	DefaultMaxTimeSeconds = 300
-	DefaultDebounceMS     = 300
-	DefaultMaxSnapshots   = 50
+	DefaultMinIntervalSeconds = 300
+	DefaultDebounceMS         = 300
+	DefaultMaxSnapshots       = 50
 )
 
 // Config holds user settings for a single watched target file.
@@ -25,19 +25,19 @@ type Config struct {
 	// TargetPath is the ABSOLUTE path to the monitored project file. It is
 	// stored absolute (not relative, as the spec's example suggests) because a
 	// detached daemon has no meaningful working directory.
-	TargetPath     string `json:"target_path"`
-	MaxTimeSeconds int    `json:"max_time_seconds"` // 0 = hash on any mtime change
-	DebounceMS     int    `json:"debounce_ms"`
-	MaxSnapshots   int    `json:"max_snapshots"`
+	TargetPath         string `json:"target_path"`
+	MinIntervalSeconds int    `json:"min_interval_seconds"` // 0 = snapshot on every content change
+	DebounceMS         int    `json:"debounce_ms"`
+	MaxSnapshots       int    `json:"max_snapshots"`
 }
 
 // Default returns a Config for targetAbsPath with safe defaults.
 func Default(targetAbsPath string) Config {
 	return Config{
-		TargetPath:     targetAbsPath,
-		MaxTimeSeconds: DefaultMaxTimeSeconds,
-		DebounceMS:     DefaultDebounceMS,
-		MaxSnapshots:   DefaultMaxSnapshots,
+		TargetPath:         targetAbsPath,
+		MinIntervalSeconds: DefaultMinIntervalSeconds,
+		DebounceMS:         DefaultDebounceMS,
+		MaxSnapshots:       DefaultMaxSnapshots,
 	}
 }
 
@@ -50,8 +50,8 @@ func (c Config) Validate() error {
 		return errors.New("debounce_ms must be > 0")
 	case c.MaxSnapshots <= 0:
 		return errors.New("max_snapshots must be > 0")
-	case c.MaxTimeSeconds < 0:
-		return errors.New("max_time_seconds must be >= 0")
+	case c.MinIntervalSeconds < 0:
+		return errors.New("min_interval_seconds must be >= 0")
 	}
 	return nil
 }

@@ -41,7 +41,7 @@ To support watching multiple distinct files within the same parent directory wit
 | Field | Type | Description |
 | --- | --- | --- |
 | `target_path` | String | Path to the specific project file (e.g., `./MainShow.qlab5`). |
-| `max_time_seconds` | Int | Maximum time allowed between saves before forcing a snapshot (fallback trigger). |
+| `min_interval_seconds` | Int | Minimum time between snapshots; saves inside this window are skipped (`0` = snapshot on every content change). |
 | `debounce_ms` | Int | Window to absorb rapid OS atomic save events (default: 300). |
 | `max_snapshots` | Int | Limit before automated garbage collection triggers. |
 
@@ -102,7 +102,7 @@ Standard applications utilize atomic saves, firing rapid Create, Write, and Rena
 To keep CPU overhead near zero, hashing is pushed to the very end of the pipeline.
 
 1. **mtime Check:** Retrieve the OS file modification timestamp (`mtime`). If `mtime` matches the last snapshot's `mtime`, abort.
-2. **Time Threshold:** If the `mtime` has changed, check the time elapsed since the last snapshot. If the time since the last snapshot exceeds `config.max_time_seconds`, proceed to hash.
+2. **Minimum Interval:** If the `mtime` has changed, check the time elapsed since the last snapshot. If at least `config.min_interval_seconds` has elapsed, proceed to hash; otherwise abort.
 3. **Hash Deduplication:** Compute the SHA-256 hash of the target file. If `CurrentHash == LastSnapshotHash`, abort (the user saved without making material changes to the file contents).
 4. **Commit:** Stream copy to `.soute_<filename>/data/<hash>.tmp`, perform an atomic `os.Rename` to `<hash>`, append the entry to `manifest.json`.
 
@@ -110,7 +110,7 @@ To keep CPU overhead near zero, hashing is pushed to the very end of the pipelin
 
 | Command | Action |
 | --- | --- |
-| `soute init <path>` | Creates the `.soute_<target_filename>/` tree in the target's directory and writes `config.json` with safe defaults (`debounce_ms: 300`, `max_time_seconds: 300`, `max_snapshots: 50`). |
+| `soute init <path>` | Creates the `.soute_<target_filename>/` tree in the target's directory and writes `config.json` with safe defaults (`debounce_ms: 300`, `min_interval_seconds: 300`, `max_snapshots: 50`). |
 | `soute watch <path>` | Entrypoint for the watcher. Forks the OS-detached daemon, writes `daemon.json`, and spins up the UDS/Named Pipe listener. |
 | `soute stop <path>` | Reads `daemon.json`, connects via UDS/Pipe, sends a stop command, waits for a clean exit, and removes the state file. |
 | `soute status <path>` | Connects via IPC to check daemon health. Prints a simple text table showing Daemon Status, Uptime, Target File, and the 3 most recent snapshots. |
