@@ -1,0 +1,14 @@
+# Build artifacts
+/soute
+/soute.exe
+/dist/
+
+# Test and coverage
+*.test
+*.out
+coverage.txt
+
+# Editor
+.DS_Store
+.idea/
+.vscode/
