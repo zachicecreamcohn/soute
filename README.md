@@ -16,6 +16,7 @@ go install github.com/zachicecreamcohn/soute/cmd/soute@latest
 
 # macOS (Homebrew)
 brew tap zachicecreamcohn/homebrew-tap
+brew trust zachicecreamcohn/tap
 brew install soute
 
 # Windows (Scoop)
