@@ -35,6 +35,7 @@ soute init show.qlab5      # create the .soute_show.qlab5/ namespace
 soute watch show.qlab5     # fork the detached daemon
 soute status               # daemon health + 3 most recent snapshots
 soute list                 # full snapshot history (ID, timestamp, size)
+soute backup show.qlab5    # manual snapshot now (add -t "label" to tag it)
 soute restore show.qlab5   # interactive picker (or pass an ID to skip it)
 soute stop                 # clean shutdown
 soute prune                # reference-counted garbage collection

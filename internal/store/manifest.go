@@ -23,7 +23,7 @@ type Snapshot struct {
 	ContentHash string    `json:"content_hash"` // lowercase 64-hex SHA-256
 	SizeBytes   int64     `json:"size_bytes"`
 	Mtime       time.Time `json:"mtime"` // source file mtime at snapshot
-	Tag         string    `json:"tag"`   // "auto" | "backup"
+	Tag         string    `json:"tag"`   // "auto" | "Manual Backup" | "pre-restore backup" | custom (-t) label
 }
 
 // Manifest is the index mapping snapshot IDs to content hashes.

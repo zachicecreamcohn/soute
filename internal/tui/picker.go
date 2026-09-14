@@ -22,7 +22,7 @@ type Item struct {
 	ID          string
 	Timestamp   time.Time
 	SizeBytes   int64
-	Tag         string // "auto" | "backup"
+	Tag         string // "auto" | "Manual Backup" | "pre-restore backup" | custom (-t) label
 	ContentHash string
 }
 
@@ -76,7 +76,7 @@ func initialModel(items []Item) model {
 	l.SetShowStatusBar(false)
 	l.SetShowHelp(false)
 	l.SetShowPagination(false)
-	l.SetFilteringEnabled(false)
+	l.SetFilteringEnabled(true)
 	l.DisableQuitKeybindings() // q/esc/ctrl+c are handled by the model
 	l.SetSize(80, 24-chromeHeight)
 	return model{list: l}
@@ -109,7 +109,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() string {
 	header := headerStyle.Render("soute · restore snapshot")
-	help := helpStyle.Render("↑/↓ navigate · enter restore · q cancel")
+	help := helpStyle.Render("↑/↓ navigate · enter restore · / filter · q cancel")
 	return lipgloss.JoinVertical(lipgloss.Left, header, m.list.View(), m.detailsView(), help)
 }
 
@@ -165,9 +165,9 @@ var (
 )
 
 func badgeStyle(tag string) lipgloss.Style {
-	c := autoCol
-	if tag == "backup" {
-		c = backupCol
+	c := backupCol
+	if tag == "auto" {
+		c = autoCol
 	}
 	return lipgloss.NewStyle().Foreground(c).Bold(true)
 }

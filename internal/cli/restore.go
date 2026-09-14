@@ -72,7 +72,7 @@ func runRestore(cmd *cobra.Command, pathArg, id string) error {
 	// --- fenced section: the CLI is the sole manifest/data writer ---
 
 	// Pre-flight backup, committed before the swap so any failure leaves the
-	// pre-restore state recoverable as a "backup" snapshot.
+	// pre-restore state recoverable as a "pre-restore backup" snapshot.
 	perm := os.FileMode(0o644)
 	if fi, err := os.Stat(paths.TargetAbs); err == nil {
 		perm = fi.Mode().Perm()
@@ -91,7 +91,7 @@ func runRestore(cmd *cobra.Command, pathArg, id string) error {
 				ContentHash: h.Hash,
 				SizeBytes:   h.Size,
 				Mtime:       fi.ModTime(),
-				Tag:         "backup",
+				Tag:         "pre-restore backup",
 			})
 			if err := store.SaveAtomic(paths.Manifest, m); err != nil {
 				return err

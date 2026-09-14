@@ -120,3 +120,17 @@ func TestViewContainsHeaderAndSelectedDetails(t *testing.T) {
 		}
 	}
 }
+
+func TestFilterValueIncludesTag(t *testing.T) {
+	it := Item{ID: "snap_1", Tag: "before the show"}
+	if !strings.Contains(it.FilterValue(), "before the show") {
+		t.Errorf("FilterValue() = %q, want it to contain the tag", it.FilterValue())
+	}
+}
+
+func TestCustomTagDescription(t *testing.T) {
+	it := Item{Tag: "before the show", SizeBytes: 452198}
+	if !strings.Contains(it.Description(), "before the show") {
+		t.Errorf("Description() = %q, want it to contain the tag", it.Description())
+	}
+}
