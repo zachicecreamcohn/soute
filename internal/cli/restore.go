@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -46,6 +47,9 @@ func runRestore(cmd *cobra.Command, pathArg, id string) error {
 	}
 
 	snap, err := selectSnapshot(m, id)
+	if errors.Is(err, tui.ErrCancelled) {
+		return nil // user aborted the picker; not an error
+	}
 	if err != nil {
 		return err
 	}
@@ -130,14 +134,20 @@ func selectSnapshot(m store.Manifest, id string) (store.Snapshot, error) {
 		return s, nil
 	}
 
-	if !isTTY(os.Stdout) {
+	if !isTTY(os.Stdin) {
 		return store.Snapshot{}, fmt.Errorf("no snapshot id provided (run interactively to pick one)")
 	}
 
 	sorted := store.SortByTimestampDesc(m.Snapshots)
 	items := make([]tui.Item, len(sorted))
 	for i, s := range sorted {
-		items[i] = tui.Item{ID: s.ID, Timestamp: s.Timestamp.UTC().Format(time.RFC3339), Size: s.SizeBytes}
+		items[i] = tui.Item{
+			ID:          s.ID,
+			Timestamp:   s.Timestamp,
+			SizeBytes:   s.SizeBytes,
+			Tag:         s.Tag,
+			ContentHash: s.ContentHash,
+		}
 	}
 	idx, err := tui.Pick(items)
 	if err != nil {
