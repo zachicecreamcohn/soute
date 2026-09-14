@@ -5,6 +5,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Version is the build version, injected at build time via
+// -ldflags "-X github.com/zacharycohn/soute/internal/cli.Version=vX.Y.Z".
+var Version = "dev"
+
 // NewRootCmd builds the soute command tree.
 func NewRootCmd() *cobra.Command {
 	root := &cobra.Command{
@@ -12,6 +16,7 @@ func NewRootCmd() *cobra.Command {
 		Short: "Zero-friction project file versioning",
 		Long: "soute watches a single structural project file (QLab, WATCHOUT, " +
 			"Ableton) and automatically creates content-addressed, deduplicated snapshots.",
+		Version:       Version,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}

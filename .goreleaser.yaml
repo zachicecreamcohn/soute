@@ -1,0 +1,61 @@
+version: 2
+
+project_name: soute
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: soute
+    main: ./cmd/soute
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - -s -w -X github.com/zacharycohn/soute/internal/cli.Version={{.Version}}
+    goos:
+      - darwin
+      - windows
+      - linux
+    goarch:
+      - amd64
+      - arm64
+
+archives:
+  - format: tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    format_overrides:
+      - goos: windows
+        format: zip
+
+# Homebrew tap (macOS). The target repo must exist under the given owner.
+brews:
+  - name: soute
+    repository:
+      owner: zacharycohn
+      name: homebrew-tap
+    homepage: "https://github.com/zacharycohn/soute"
+    description: "Zero-friction project file versioning"
+    license: MIT
+
+# Scoop bucket (Windows). The target repo must exist under the given owner.
+scoop:
+  - name: soute
+    bucket:
+      owner: zacharycohn
+      name: scoop-bucket
+    homepage: "https://github.com/zacharycohn/soute"
+    description: "Zero-friction project file versioning"
+    license: MIT
+
+checksum:
+  name_template: "checksums.txt"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^ci:"
+      - "^chore:"
