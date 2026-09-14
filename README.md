@@ -15,7 +15,8 @@ heavy assets.
 go install github.com/zacharycohn/soute/cmd/soute@latest
 
 # macOS (Homebrew)
-brew install zacharycohn/tap/soute
+brew tap zacharycohn/homebrew-tap
+brew install soute
 
 # Windows (Scoop)
 scoop bucket add zacharycohn https://github.com/zacharycohn/scoop-bucket
